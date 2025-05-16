@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Kas Sederhana</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 20px;
+      background: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #aaa;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .list {
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #aaa;
+      margin-bottom: 20px;
+    }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .item:last-child {
+      border-bottom: none;
+    }
+    .income {
+      color: green;
+    }
+    .expense {
+      color: red;
+    }
+    .saldo {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #aaa;
+      margin-bottom: 30px;
+    }
+    .total {
+      text-align: right;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aplikasi Kas Sederhana</h1>
+
+  <div class="saldo" id="saldo">Saldo: Rp 0</div>
+
+  <form id="formKas">
+    <label for="jenis">Jenis:</label>
+    <select id="jenis" required>
+      <option value="">--Pilih--</option>
+      <option value="pemasukan">Pemasukan</option>
+      <option value="pengeluaran">Pengeluaran</option>
+    </select>
+
+    <label for="keterangan">Keterangan:</label>
+    <input type="text" id="keterangan" placeholder="Misal: Gaji bulan Mei" required />
+
+    <label for="jumlah">Jumlah (Rp):</label>
+    <input type="number" id="jumlah" placeholder="Misal: 1000000" min="1" required />
+
+    <button type="submit">Tambah Data</button>
+  </form>
+
+  <div class="list" id="listPemasukan">
+    <h3>Pemasukan</h3>
+    <div id="pemasukanItems">Belum ada data pemasukan</div>
+    <div class="total" id="totalPemasukan">Total: Rp 0</div>
+  </div>
+
+  <div class="list" id="listPengeluaran">
+    <h3>Pengeluaran</h3>
+    <div id="pengeluaranItems">Belum ada data pengeluaran</div>
+    <div class="total" id="totalPengeluaran">Total: Rp 0</div>
+  </div>
+
+  <script>
+    const formKas = document.getElementById('formKas');
+    const jenisInput = document.getElementById('jenis');
+    const keteranganInput = document.getElementById('keterangan');
+    const jumlahInput = document.getElementById('jumlah');
+    const saldoDisplay = document.getElementById('saldo');
+    const pemasukanItems = document.getElementById('pemasukanItems');
+    const pengeluaranItems = document.getElementById('pengeluaranItems');
+    const totalPemasukanDisplay = document.getElementById('totalPemasukan');
+    const totalPengeluaranDisplay = document.getElementById('totalPengeluaran');
+
+    let pemasukanList = [];
+    let pengeluaranList = [];
+    let saldo = 0;
+
+    function updateDisplay() {
+      // Hitung total
+      const totalMasuk = pemasukanList.reduce((acc, item) => acc + item.jumlah, 0);
+      const totalKeluar = pengeluaranList.reduce((acc, item) => acc + item.jumlah, 0);
+
+      // Update list pemasukan
+      if (pemasukanList.length === 0) {
+        pemasukanItems.innerHTML = 'Belum ada data pemasukan';
+      } else {
+        pemasukanItems.innerHTML = '';
+        pemasukanList.forEach((item) => {
+          const div = document.createElement('div');
+          div.classList.add('item', 'income');
+          div.innerHTML = `<span>${item.keterangan}</span><span>Rp ${item.jumlah.toLocaleString()}</span>`;
+          pemasukanItems.appendChild(div);
+        });
+      }
+
+      // Update list pengeluaran
+      if (pengeluaranList.length === 0) {
+        pengeluaranItems.innerHTML = 'Belum ada data pengeluaran';
+      } else {
+        pengeluaranItems.innerHTML = '';
+        pengeluaranList.forEach((item) => {
+          const div = document.createElement('div');
+          div.classList.add('item', 'expense');
+          div.innerHTML = `<span>${item.keterangan}</span><span>Rp ${item.jumlah.toLocaleString()}</span>`;
+          pengeluaranItems.appendChild(div);
+        });
+      }
+
+      // Update total pemasukan & pengeluaran
+      totalPemasukanDisplay.textContent = `Total: Rp ${totalMasuk.toLocaleString()}`;
+      totalPengeluaranDisplay.textContent = `Total: Rp ${totalKeluar.toLocaleString()}`;
+
+      // Update saldo
+      saldo = totalMasuk - totalKeluar;
+      saldoDisplay.textContent = `Saldo: Rp ${saldo.toLocaleString()}`;
+    }
+
+    formKas.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const jenis = jenisInput.value;
+      const keterangan = keteranganInput.value.trim();
+      const jumlah = parseInt(jumlahInput.value);
+
+      if (!jenis || !keterangan || isNaN(jumlah) || jumlah <= 0) {
+        alert('Mohon isi data dengan benar.');
+        return;
+      }
+
+      if (jenis === 'pemasukan') {
+        pemasukanList.push({ keterangan, jumlah });
+      } else if (jenis === 'pengeluaran') {
+        pengeluaranList.push({ keterangan, jumlah });
+      }
+
+      updateDisplay();
+      formKas.reset();
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
